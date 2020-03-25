@@ -114,6 +114,70 @@ NFA star_logic(NFA nfa1){
 
 };
 
+
+/*
+Use of only these 3 operators are permitted : 
+(1).
+(2)|
+(3)*
+expressions like [1-3] should be written instead as 1|2|3
+Each operator along with the operand must be enclosed within brackets
+for example : ((a|b)*) ,(a)
+Only regular expressions following the above rules will generate valid results
+ */
+
+
+NFA convert(string s){
+    stack <NFA> operands;
+    stack <string> operators;
+
+    for(int i=0;i<s.size();++i){
+        if(s[i]!=')' && s[i]!='(' && s[i]!='.' && s[i]!='*' && s[i]!='|'){
+            NFA nfa;
+            nfa=init_nfa(string(1,s[i]));
+            operands.push(nfa);
+        }
+        else if (s[i]=='*'){
+            NFA nfa=operands.top();
+            operands.pop();
+            nfa=star_logic(nfa);;
+            operands.push(nfa);
+        }
+        else if (s[i]!=')'){
+            operators.push(string(1,s[i]));
+        }
+        else{
+            // current symbol is )
+            if(operators.top()==")"){
+                operators.pop();
+                continue;
+            }
+            else if(operators.top()=="."){
+                operators.pop();
+                NFA op1,op2;
+                op1=operands.top();
+                operands.pop();
+                op2=operands.top();
+                operands.pop();
+                NFA nfa=and_logic(op1,op2);
+                operands.push(nfa);
+            }
+            else if(operators.top()=="|"){
+                operators.pop();
+                NFA op1,op2;
+                op1=operands.top();
+                operands.pop();
+                op2=operands.top();
+                operands.pop();
+                NFA nfa=or_logic(op1,op2);
+                operands.push(nfa);
+            }
+        }
+    }
+    return operands.top();
+}
+
+
 int main(){
     NFA obj0=init_nfa("a");
     NFA obj1=init_nfa("b");
