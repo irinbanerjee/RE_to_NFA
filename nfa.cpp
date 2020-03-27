@@ -159,7 +159,7 @@ NFA convert(string s){
                 operands.pop();
                 op2=operands.top();
                 operands.pop();
-                NFA nfa=and_logic(op1,op2);
+                NFA nfa=and_logic(op2,op1);
                 operands.push(nfa);
             }
             else if(operators.top()=="|"){
@@ -169,7 +169,7 @@ NFA convert(string s){
                 operands.pop();
                 op2=operands.top();
                 operands.pop();
-                NFA nfa=or_logic(op1,op2);
+                NFA nfa=or_logic(op2,op1);
                 operands.push(nfa);
             }
         }
@@ -179,11 +179,11 @@ NFA convert(string s){
 
 
 int main(){
-    NFA obj0=init_nfa("a");
+    NFA obj0=convert("((a.b)*)");
     NFA obj1=init_nfa("b");
     NFA obj2=or_logic(obj0,obj1);
     NFA obj3=star_logic(obj2);
-    obj3.display();
+    obj0.display();
     return 0;
 }
 
