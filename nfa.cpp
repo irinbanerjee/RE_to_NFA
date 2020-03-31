@@ -137,41 +137,42 @@ NFA convert(string s){
             nfa=init_nfa(string(1,s[i]));
             operands.push(nfa);
         }
-        else if (s[i]=='*'){
-            NFA nfa=operands.top();
-            operands.pop();
-            nfa=star_logic(nfa);;
-            operands.push(nfa);
+        else if(s[i]=='('){
+            operators.push("(");
         }
-        else if (s[i]!=')'){
-            operators.push(string(1,s[i]));
+        else if (s[i]==')'){
+            while(operators.top()!="("){
+                string sym=operators.top();
+                operators.pop();
+                if(sym=="*"){
+                    NFA nfa=operands.top();
+                    operands.pop();
+                    nfa=star_logic(nfa);;
+                    operands.push(nfa);
+                }
+                else if(sym=="."){
+                    NFA op1,op2;
+                    op1=operands.top();
+                    operands.pop();
+                    op2=operands.top();
+                    operands.pop();
+                    NFA nfa=and_logic(op2,op1);
+                    operands.push(nfa);
+                }
+                else if(sym=="|"){
+                    NFA op1,op2;
+                    op1=operands.top();
+                    operands.pop();
+                    op2=operands.top();
+                    operands.pop();
+                    NFA nfa=or_logic(op2,op1);
+                    operands.push(nfa);
+                }
+            }
+            operators.pop();
         }
         else{
-            // current symbol is )
-            if(operators.top()==")"){
-                operators.pop();
-                continue;
-            }
-            else if(operators.top()=="."){
-                operators.pop();
-                NFA op1,op2;
-                op1=operands.top();
-                operands.pop();
-                op2=operands.top();
-                operands.pop();
-                NFA nfa=and_logic(op2,op1);
-                operands.push(nfa);
-            }
-            else if(operators.top()=="|"){
-                operators.pop();
-                NFA op1,op2;
-                op1=operands.top();
-                operands.pop();
-                op2=operands.top();
-                operands.pop();
-                NFA nfa=or_logic(op2,op1);
-                operands.push(nfa);
-            }
+           operators.push(string(1,s[i])); 
         }
     }
     return operands.top();
@@ -179,10 +180,7 @@ NFA convert(string s){
 
 
 int main(){
-    NFA obj0=convert("((a.b)*)");
-    NFA obj1=init_nfa("b");
-    NFA obj2=or_logic(obj0,obj1);
-    NFA obj3=star_logic(obj2);
+    NFA obj0=convert("(1.(2|3))");
     obj0.display();
     return 0;
 }
