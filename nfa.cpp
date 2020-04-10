@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
-#define max 100
+#define max 117
+#define stack_max 500
 
 class NFA{
     public:
@@ -126,16 +127,44 @@ for example : ((a|b)*) ,(a)
 Only regular expressions following the above rules will generate valid results
  */
 
+class NFA_stack{
+    NFA obj_stack[stack_max];
+    int count=0;
+
+    public:
+    int is_empty(){
+        if(count==0)return 1;
+        return 0;
+    }
+
+    public:
+    void push(NFA obj){
+        obj_stack[count]=obj;
+        count++;
+    }
+
+    public:
+    NFA top(){
+        return obj_stack[count-1];
+    }
+
+    public:
+    void pop(){
+        count--;
+    }
+
+};
 
 NFA convert(string s){
-    stack <NFA> operands;
+    NFA_stack* operands = new NFA_stack();
     stack <string> operators;
-
+    cout<<s.size()<<"\n";
     for(int i=0;i<s.size();++i){
-        if(s[i]!=')' && s[i]!='(' && s[i]!='.' && s[i]!='*' && s[i]!='|'){
+        cout<<"start-"<<i<<"\n";
+        if(s[i]!=')' && s[i]!='(' && s[i]!='&' && s[i]!='*' && s[i]!='|'){
             NFA nfa;
             nfa=init_nfa(string(1,s[i]));
-            operands.push(nfa);
+            operands->push(nfa);
         }
         else if(s[i]=='('){
             operators.push("(");
@@ -145,28 +174,29 @@ NFA convert(string s){
                 string sym=operators.top();
                 operators.pop();
                 if(sym=="*"){
-                    NFA nfa=operands.top();
-                    operands.pop();
+                    NFA nfa=operands->top();
+                    operands->pop();
                     nfa=star_logic(nfa);;
-                    operands.push(nfa);
+                    operands->push(nfa);
                 }
-                else if(sym=="."){
+                else if(sym=="&"){
                     NFA op1,op2;
-                    op1=operands.top();
-                    operands.pop();
-                    op2=operands.top();
-                    operands.pop();
+                    op1=operands->top();
+                    operands->pop();
+                    op2=operands->top();
+                    operands->pop();
+                    cout<<op1.node_count<<"-"<<op2.node_count<<"\n";
                     NFA nfa=and_logic(op2,op1);
-                    operands.push(nfa);
+                    operands->push(nfa);
                 }
                 else if(sym=="|"){
                     NFA op1,op2;
-                    op1=operands.top();
-                    operands.pop();
-                    op2=operands.top();
-                    operands.pop();
+                    op1=operands->top();
+                    operands->pop();
+                    op2=operands->top();
+                    operands->pop();
                     NFA nfa=or_logic(op2,op1);
-                    operands.push(nfa);
+                    operands->push(nfa);
                 }
             }
             operators.pop();
@@ -174,14 +204,15 @@ NFA convert(string s){
         else{
            operators.push(string(1,s[i])); 
         }
+        cout<<"end-"<<i<<"\n";
     }
-    return operands.top();
+    return operands->top();
 }
 
 
 int main(){
-    NFA obj0=convert("(1.(2|3))");
-    obj0.display();
+    NFA obj0=convert("(((((((((0|1)|2)|3)|4)|5)|6))&.)&((((((((((0|1)|2)|3)|4)|5)|6)|7)|8)|9)&((((((((((0|1)|2)|3)|4)|5)|6)|7)|8)|9))))");
+   obj0.display();
     return 0;
 }
 
